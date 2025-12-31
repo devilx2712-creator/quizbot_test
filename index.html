@@ -389,7 +389,7 @@
             <!-- Quiz Info Tab -->
             <div id="quiz-info" class="tab-content active">
                 <h2>📝 Quiz Information</h2>
-                
+
                 <div class="form-group">
                     <label for="quiz-title">Quiz Title:</label>
                     <input 
@@ -422,7 +422,7 @@
             <!-- Questions Tab -->
             <div id="questions" class="tab-content">
                 <h2>❓ Quiz Questions</h2>
-                
+
                 <div id="questions-list">
                     <!-- Questions will be added here -->
                 </div>
@@ -446,7 +446,7 @@
             <!-- Preview Tab -->
             <div id="preview" class="tab-content">
                 <h2>👁️ Quiz Preview</h2>
-                
+
                 <div class="preview-section" id="quiz-preview">
                     <div id="preview-title">Quiz title will appear here...</div>
                     <div id="preview-description" style="margin: 10px 0; color: #666;"></div>
@@ -481,7 +481,7 @@
                     <button type="button" class="action-btn delete" onclick="deleteQuestion(0)">Delete</button>
                 </div>
             </div>
-            
+
             <div class="question-content">
                 <div class="form-group">
                     <label>Question:</label>
@@ -514,24 +514,29 @@
         const tg = window.Telegram.WebApp;
         tg.expand();
         tg.ready();
-        
+
+        // Check if WebApp is running inside Telegram
+        if (!tg.initData) {
+            console.warn("WebApp is not running inside Telegram. Some features may not work.");
+        }
+
         // Quiz data structure
         let quizData = {
             title: '',
             description: '',
             questions: []
         };
-        
+
         let currentQuestionIndex = -1;
         let editingQuestionIndex = -1;
-        
+
         // DOM elements
         const quizTitleInput = document.getElementById('quiz-title');
         const quizDescriptionInput = document.getElementById('quiz-description');
         const questionsList = document.getElementById('questions-list');
         const quizPreview = document.getElementById('quiz-preview');
         const questionsPreview = document.getElementById('questions-preview');
-        
+
         // Tab navigation
         function showTab(tabName) {
             // Hide all tabs
@@ -541,19 +546,19 @@
             document.querySelectorAll('.tab').forEach(tab => {
                 tab.classList.remove('active');
             });
-            
+
             // Show selected tab
             document.getElementById(tabName).classList.add('active');
             document.querySelector(`.tab[onclick="showTab('${tabName}')"]`).classList.add('active');
         }
-        
+
         // Add new question
         function addQuestion() {
             if (quizData.questions.length >= 50) {
                 showStatus('Maximum 50 questions allowed', 'error');
                 return;
             }
-            
+
             const newIndex = quizData.questions.length;
             quizData.questions.push({
                 question: '',
@@ -561,20 +566,20 @@
                 correct_option: 0,
                 explanation: ''
             });
-            
+
             editingQuestionIndex = newIndex;
             renderQuestionsList();
             updateQuestionCount();
         }
-        
+
         // Render questions list
         function renderQuestionsList() {
             questionsList.innerHTML = '';
-            
+
             quizData.questions.forEach((question, index) => {
                 const questionCard = document.createElement('div');
                 questionCard.className = 'question-card';
-                
+
                 if (editingQuestionIndex === index) {
                     // Show edit form
                     questionCard.innerHTML = getQuestionFormHTML(index);
@@ -582,18 +587,18 @@
                     // Show preview card
                     questionCard.innerHTML = getQuestionCardHTML(index);
                 }
-                
+
                 questionsList.appendChild(questionCard);
             });
-            
+
             updatePreview();
         }
-        
+
         // Get question form HTML
         function getQuestionFormHTML(index) {
             const question = quizData.questions[index];
             const questionNumber = index + 1;
-            
+
             return `
                 <div class="question-form" data-question-index="${index}">
                     <div class="question-header">
@@ -603,7 +608,7 @@
                             <button type="button" class="action-btn delete" onclick="cancelEdit(${index})">Cancel</button>
                         </div>
                     </div>
-                    
+
                     <div class="question-content">
                         <div class="form-group">
                             <label>Question:</label>
@@ -631,13 +636,13 @@
                 </div>
             `;
         }
-        
+
         // Get question card HTML
         function getQuestionCardHTML(index) {
             const question = quizData.questions[index];
             const questionNumber = index + 1;
             let optionsHTML = '';
-            
+
             question.options.forEach((option, optIndex) => {
                 if (option.trim()) {
                     optionsHTML += `
@@ -648,7 +653,7 @@
                     `;
                 }
             });
-            
+
             return `
                 <div class="question-header">
                     <div class="question-number">${questionNumber}</div>
@@ -657,22 +662,22 @@
                         <button type="button" class="action-btn delete" onclick="deleteQuestion(${index})">Delete</button>
                     </div>
                 </div>
-                
+
                 <div class="question-text">${question.question || 'No question text'}</div>
-                
+
                 <div class="options-list">
                     ${optionsHTML || '<div style="color: #666; font-style: italic;">No options added</div>'}
                 </div>
-                
+
                 ${question.explanation ? `<div style="margin-top: 10px; color: #666; font-size: 14px;">💡 ${question.explanation}</div>` : ''}
             `;
         }
-        
+
         // Render options for a question
         function renderOptions(questionIndex) {
             const question = quizData.questions[questionIndex];
             let optionsHTML = '';
-            
+
             question.options.forEach((option, optIndex) => {
                 optionsHTML += `
                     <div class="option-group">
@@ -691,10 +696,10 @@
                     </div>
                 `;
             });
-            
+
             return optionsHTML;
         }
-        
+
         // Update question text
         function updateQuestion(index, value) {
             quizData.questions[index].question = value;
@@ -703,13 +708,13 @@
                 counter.textContent = `${value.length}/300`;
             }
         }
-        
+
         // Update option value
         function updateOptionValue(questionIndex, optionIndex, value) {
             quizData.questions[questionIndex].options[optionIndex] = value;
             updateOptionCount(questionIndex);
         }
-        
+
         // Add option to question
         function addOption(questionIndex) {
             const question = quizData.questions[questionIndex];
@@ -717,11 +722,11 @@
                 showStatus('Maximum 6 options per question', 'error');
                 return;
             }
-            
+
             question.options.push('');
             renderQuestionsList();
         }
-        
+
         // Remove option from question
         function removeOption(questionIndex, optionIndex) {
             const question = quizData.questions[questionIndex];
@@ -729,22 +734,22 @@
                 showStatus('Minimum 2 options required', 'error');
                 return;
             }
-            
+
             question.options.splice(optionIndex, 1);
-            
+
             // Adjust correct option if needed
             if (question.correct_option >= optionIndex) {
                 question.correct_option = Math.max(0, question.correct_option - 1);
             }
-            
+
             renderQuestionsList();
         }
-        
+
         // Set correct option
         function setCorrectOption(questionIndex, optionIndex) {
             quizData.questions[questionIndex].correct_option = optionIndex;
         }
-        
+
         // Update explanation
         function updateExplanation(questionIndex, value) {
             quizData.questions[questionIndex].explanation = value;
@@ -753,7 +758,7 @@
                 counter.textContent = `${value.length}/200`;
             }
         }
-        
+
         // Update option count display
         function updateOptionCount(questionIndex) {
             const question = quizData.questions[questionIndex];
@@ -763,51 +768,51 @@
                 counter.textContent = `${validOptions} options added (max: 6)`;
             }
         }
-        
+
         // Edit question
         function editQuestion(index) {
             editingQuestionIndex = index;
             renderQuestionsList();
         }
-        
+
         // Save question
         function saveQuestion(index) {
             const question = quizData.questions[index];
-            
+
             // Validate question
             if (!question.question.trim()) {
                 showStatus('Please enter question text', 'error');
                 return;
             }
-            
+
             const validOptions = question.options.filter(opt => opt.trim());
             if (validOptions.length < 2) {
                 showStatus('Please enter at least 2 options', 'error');
                 return;
             }
-            
+
             // Filter out empty options
             question.options = validOptions;
-            
+
             editingQuestionIndex = -1;
             renderQuestionsList();
             showStatus('Question saved successfully!', 'success');
             setTimeout(() => showStatus('', ''), 2000);
         }
-        
+
         // Cancel edit
         function cancelEdit(index) {
             editingQuestionIndex = -1;
             renderQuestionsList();
         }
-        
+
         // Delete question
         function deleteQuestion(index) {
             if (quizData.questions.length <= 1) {
                 showStatus('Quiz must have at least 1 question', 'error');
                 return;
             }
-            
+
             quizData.questions.splice(index, 1);
             editingQuestionIndex = -1;
             renderQuestionsList();
@@ -815,32 +820,32 @@
             showStatus('Question deleted', 'success');
             setTimeout(() => showStatus('', ''), 2000);
         }
-        
+
         // Update question count
         function updateQuestionCount() {
             const countElement = document.getElementById('question-count');
             countElement.textContent = `${quizData.questions.length} question${quizData.questions.length !== 1 ? 's' : ''} added`;
         }
-        
+
         // Update preview
         function updatePreview() {
             // Update quiz info preview
             const previewTitle = document.getElementById('preview-title');
             const previewDescription = document.getElementById('preview-description');
             const previewCount = document.getElementById('preview-questions-count');
-            
+
             previewTitle.textContent = quizData.title || 'Quiz title will appear here...';
             previewDescription.textContent = quizData.description || 'No description';
             previewCount.textContent = `${quizData.questions.length} question${quizData.questions.length !== 1 ? 's' : ''}`;
-            
+
             // Update questions preview
             questionsPreview.innerHTML = '';
-            
+
             quizData.questions.forEach((question, index) => {
                 const questionDiv = document.createElement('div');
                 questionDiv.className = 'preview-section';
                 questionDiv.style.margin = '10px 0';
-                
+
                 questionDiv.innerHTML = `
                     <div class="preview-question">Q${index + 1}. ${question.question || 'No question text'}</div>
                     <div style="margin: 10px 0;">
@@ -851,120 +856,40 @@
                             </div>
                         `).join('')}
                     </div>
-                    ${question.explanation ? `<div style="color: #666; font-size: 14px; margin-top: 10px;">💡 ${question.explanation}</div>` : ''}
+                    ${question.explanation ? `<div style="margin-top: 10px; font-size: 0.9em; color: #666;">💡 ${question.explanation}</div>` : ''}
                 `;
-                
+
                 questionsPreview.appendChild(questionDiv);
             });
-            
+
             if (quizData.questions.length === 0) {
                 questionsPreview.innerHTML = '<div style="color: #666; font-style: italic; text-align: center;">No questions added yet</div>';
             }
-            
+
             // Update counters
             document.getElementById('title-counter').textContent = `${quizData.title.length}/100`;
             document.getElementById('description-counter').textContent = `${quizData.description.length}/200`;
         }
-        
-        // Show status message
-        function showStatus(message, type) {
-            const statusDiv = document.getElementById('status');
-            statusDiv.textContent = message;
-            statusDiv.className = `status ${type}`;
+
+        function showStatus(msg, type) {
+            const status = document.getElementById('status');
+            status.textContent = msg;
+            status.className = `status ${type}`;
+            status.style.display = 'block';
+            setTimeout(() => { status.style.display = 'none'; }, 3000);
         }
-        
-        // Event listeners
-        quizTitleInput.addEventListener('input', function() {
-            quizData.title = this.value;
-            updatePreview();
-        });
-        
-        quizDescriptionInput.addEventListener('input', function() {
-            quizData.description = this.value;
-            updatePreview();
-        });
-        
-        // Form submission
-        document.getElementById('quiz-form').addEventListener('submit', function(e) {
+
+        document.getElementById('quiz-form').onsubmit = function(e) {
             e.preventDefault();
-            
-            const submitBtn = document.getElementById('submit-btn');
-            const statusDiv = document.getElementById('status');
-            
-            // Validate quiz title
-            if (!quizData.title.trim()) {
-                showStatus('Please enter a quiz title', 'error');
-                showTab('quiz-info');
-                return;
-            }
-            
-            // Validate questions
             if (quizData.questions.length === 0) {
-                showStatus('Please add at least 1 question', 'error');
-                showTab('questions');
+                showStatus('Add at least one question', 'error');
                 return;
             }
-            
-            // Validate each question
-            for (let i = 0; i < quizData.questions.length; i++) {
-                const question = quizData.questions[i];
-                
-                if (!question.question.trim()) {
-                    showStatus(`Question ${i + 1} has no text`, 'error');
-                    showTab('questions');
-                    editQuestion(i);
-                    return;
-                }
-                
-                const validOptions = question.options.filter(opt => opt.trim());
-                if (validOptions.length < 2) {
-                    showStatus(`Question ${i + 1} needs at least 2 options`, 'error');
-                    showTab('questions');
-                    editQuestion(i);
-                    return;
-                }
-            }
-            
-            // Disable button and show loading
-            submitBtn.disabled = true;
-            submitBtn.innerHTML = '⏳ Creating Quiz...';
-            statusDiv.className = 'status';
-            
-            // Send data to bot
-            try {
-                tg.sendData(JSON.stringify(quizData));
-                
-                // Show success message
-                statusDiv.textContent = '✅ Quiz created successfully! Closing in 3 seconds...';
-                statusDiv.className = 'status success';
-                
-                // Close WebApp after delay
-                setTimeout(() => {
-                    tg.close();
-                }, 3000);
-                
-            } catch (error) {
-                // Show error message
-                showStatus('❌ Error creating quiz. Please try again.', 'error');
-                
-                // Re-enable button
-                submitBtn.disabled = false;
-                submitBtn.innerHTML = '🚀 Create Quiz';
-            }
-        });
-        
-        // Initialize with one question
-        addQuestion();
-        updateQuestionCount();
-        
-        // Set main button color to match theme
-        tg.MainButton.setParams({
-            color: '#667eea'
-        });
-        
-        // Set theme to match Telegram
-        tg.setHeaderColor('#667eea');
-        tg.setBackgroundColor('#f0f0f0');
+            tg.sendData(JSON.stringify(quizData));
+        };
+
+        // Initialize first view
+        updatePreview();
     </script>
 </body>
 </html>
