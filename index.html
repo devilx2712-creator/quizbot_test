@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Telegram Web App</title>
+    <title>Quiz Bot</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         * {
@@ -27,128 +27,292 @@
             border-radius: 20px;
             padding: 30px;
             width: 100%;
-            max-width: 400px;
+            max-width: 500px;
             box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
         }
         
-        h1 {
-            color: #333;
-            text-align: center;
-            margin-bottom: 10px;
-            font-size: 24px;
-        }
-        
-        .subtitle {
-            color: #666;
+        .header {
             text-align: center;
             margin-bottom: 30px;
-            font-size: 14px;
         }
         
-        .form-group {
-            margin-bottom: 20px;
+        .header h1 {
+            color: #333;
+            font-size: 28px;
+            margin-bottom: 10px;
         }
         
-        label {
-            display: block;
-            margin-bottom: 8px;
-            color: #555;
-            font-weight: 500;
-        }
-        
-        input {
-            width: 100%;
-            padding: 12px 15px;
-            border: 2px solid #e0e0e0;
-            border-radius: 10px;
+        .header p {
+            color: #666;
             font-size: 16px;
-            transition: border-color 0.3s;
         }
         
-        input:focus {
-            outline: none;
+        .quiz-progress {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding: 10px 0;
+            border-bottom: 2px solid #f0f0f0;
+        }
+        
+        .progress-bar {
+            flex-grow: 1;
+            height: 6px;
+            background: #e0e0e0;
+            border-radius: 3px;
+            margin: 0 15px;
+            overflow: hidden;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: #667eea;
+            width: 0%;
+            transition: width 0.3s;
+        }
+        
+        .question-container {
+            display: none;
+        }
+        
+        .question-container.active {
+            display: block;
+            animation: fadeIn 0.5s;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .question-text {
+            font-size: 20px;
+            color: #333;
+            margin-bottom: 25px;
+            line-height: 1.4;
+        }
+        
+        .options-container {
+            display: grid;
+            gap: 12px;
+            margin-bottom: 30px;
+        }
+        
+        .option {
+            padding: 15px 20px;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 16px;
+            color: #333;
+        }
+        
+        .option:hover {
             border-color: #667eea;
+            background: #f8f9ff;
         }
         
-        .score-slider {
-            width: 100%;
-            margin: 10px 0;
+        .option.selected {
+            border-color: #667eea;
+            background: #667eea;
+            color: white;
         }
         
-        .score-value {
-            text-align: center;
-            font-weight: bold;
-            color: #667eea;
-            font-size: 18px;
-            margin-top: 5px;
+        .option.correct {
+            border-color: #4CAF50;
+            background: #4CAF50;
+            color: white;
+        }
+        
+        .option.incorrect {
+            border-color: #f44336;
+            background: #f44336;
+            color: white;
+        }
+        
+        .navigation {
+            display: flex;
+            justify-content: space-between;
+            gap: 15px;
         }
         
         .btn {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border: none;
+            flex: 1;
             padding: 15px;
-            width: 100%;
-            border-radius: 10px;
+            border: none;
+            border-radius: 12px;
             font-size: 16px;
             font-weight: 600;
             cursor: pointer;
-            transition: transform 0.2s, box-shadow 0.2s;
-            margin-top: 10px;
+            transition: all 0.2s;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        .btn-secondary {
+            background: #f0f0f0;
+            color: #333;
         }
         
         .btn:hover {
             transform: translateY(-2px);
-            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.4);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
         }
         
         .btn:active {
             transform: translateY(0);
         }
         
-        .status {
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        
+        .results-container {
+            display: none;
             text-align: center;
-            margin-top: 20px;
+            padding: 20px 0;
+        }
+        
+        .results-container.active {
+            display: block;
+            animation: fadeIn 0.5s;
+        }
+        
+        .score-circle {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            margin: 0 auto 30px;
+            font-size: 24px;
+            font-weight: bold;
+        }
+        
+        .score-percentage {
+            font-size: 36px;
+            margin-bottom: 5px;
+        }
+        
+        .result-text {
+            font-size: 20px;
+            color: #333;
+            margin-bottom: 20px;
+        }
+        
+        .result-details {
+            text-align: left;
+            margin-top: 30px;
+            padding: 20px;
+            background: #f8f9ff;
+            border-radius: 12px;
+        }
+        
+        .result-item {
+            margin-bottom: 15px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        
+        .result-item:last-child {
+            border-bottom: none;
+        }
+        
+        .status {
             padding: 10px;
             border-radius: 8px;
+            margin: 10px 0;
+            text-align: center;
             font-size: 14px;
             display: none;
         }
         
-        .success {
+        .status.success {
             background: #d4edda;
             color: #155724;
             display: block;
         }
         
-        .error {
+        .status.error {
             background: #f8d7da;
             color: #721c24;
             display: block;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+        
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>📊 Web App Demo</h1>
-        <p class="subtitle">Submit your data to the Telegram Bot</p>
+        <div class="header">
+            <h1>📚 Quiz Time</h1>
+            <p>Test your knowledge with this quiz</p>
+        </div>
         
-        <form id="webapp-form">
-            <div class="form-group">
-                <label for="name">Your Name:</label>
-                <input type="text" id="name" placeholder="Enter your name" required>
+        <div id="loading" class="loading">
+            <div class="spinner"></div>
+            <p>Loading quiz...</p>
+        </div>
+        
+        <div id="quiz-content" style="display: none;">
+            <div class="quiz-progress">
+                <span id="current-question">1</span>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progress-fill"></div>
+                </div>
+                <span id="total-questions">3</span>
             </div>
             
-            <div class="form-group">
-                <label for="score">Your Score:</label>
-                <input type="range" id="score" class="score-slider" min="0" max="100" value="50">
-                <div class="score-value" id="score-value">50</div>
+            <div id="questions-container"></div>
+            
+            <div class="navigation">
+                <button id="prev-btn" class="btn btn-secondary" onclick="prevQuestion()">Previous</button>
+                <button id="next-btn" class="btn btn-primary" onclick="nextQuestion()">Next</button>
             </div>
             
-            <button type="submit" class="btn" id="submit-btn">
-                📤 Send to Bot
-            </button>
-        </form>
+            <div id="results-container" class="results-container">
+                <div class="score-circle">
+                    <div class="score-percentage" id="score-percentage">0%</div>
+                    <div id="score-text">0/0</div>
+                </div>
+                <div class="result-text" id="result-message"></div>
+                <button id="submit-btn" class="btn btn-primary" onclick="submitQuiz()">
+                    📤 Submit Quiz
+                </button>
+                <div id="result-details" class="result-details"></div>
+            </div>
+        </div>
         
         <div id="status" class="status"></div>
     </div>
@@ -159,70 +323,282 @@
         tg.expand();
         tg.ready();
         
-        // Update score display
-        const scoreSlider = document.getElementById('score');
-        const scoreValue = document.getElementById('score-value');
+        // Quiz state
+        let quizData = null;
+        let currentQuestionIndex = 0;
+        let userAnswers = {};
+        let quizResults = null;
         
-        scoreSlider.addEventListener('input', function() {
-            scoreValue.textContent = this.value;
-        });
+        // DOM elements
+        const loadingEl = document.getElementById('loading');
+        const quizContentEl = document.getElementById('quiz-content');
+        const questionsContainer = document.getElementById('questions-container');
+        const currentQuestionEl = document.getElementById('current-question');
+        const totalQuestionsEl = document.getElementById('total-questions');
+        const progressFillEl = document.getElementById('progress-fill');
+        const prevBtn = document.getElementById('prev-btn');
+        const nextBtn = document.getElementById('next-btn');
+        const resultsContainer = document.getElementById('results-container');
+        const statusEl = document.getElementById('status');
         
-        // Handle form submission
-        document.getElementById('webapp-form').addEventListener('submit', function(e) {
-            e.preventDefault();
+        // Sample quiz data (in production, this comes from the bot)
+        const SAMPLE_QUIZ = {
+            "title": "General Knowledge Quiz",
+            "questions": [
+                {
+                    "id": 1,
+                    "question": "What is the capital of France?",
+                    "options": ["London", "Berlin", "Paris", "Madrid"],
+                    "correct": 2
+                },
+                {
+                    "id": 2,
+                    "question": "Which planet is known as the Red Planet?",
+                    "options": ["Venus", "Mars", "Jupiter", "Saturn"],
+                    "correct": 1
+                },
+                {
+                    "id": 3,
+                    "question": "What is 2 + 2?",
+                    "options": ["3", "4", "5", "6"],
+                    "correct": 1
+                }
+            ]
+        };
+        
+        // Initialize quiz
+        function initQuiz() {
+            // In production, get quiz data from bot via initData or URL parameters
+            // For now, use sample data
+            quizData = SAMPLE_QUIZ;
             
-            const submitBtn = document.getElementById('submit-btn');
-            const statusDiv = document.getElementById('status');
+            // Show quiz content
+            loadingEl.style.display = 'none';
+            quizContentEl.style.display = 'block';
             
-            // Get form data
-            const name = document.getElementById('name').value.trim();
-            const score = document.getElementById('score').value;
+            // Update UI
+            totalQuestionsEl.textContent = quizData.questions.length;
             
-            if (!name) {
-                statusDiv.textContent = "Please enter your name";
-                statusDiv.className = "status error";
-                return;
+            // Create question elements
+            quizData.questions.forEach((question, index) => {
+                const questionEl = document.createElement('div');
+                questionEl.className = 'question-container';
+                questionEl.id = `question-${index}`;
+                
+                questionEl.innerHTML = `
+                    <div class="question-text">${index + 1}. ${question.question}</div>
+                    <div class="options-container" id="options-${index}">
+                        ${question.options.map((option, optIndex) => `
+                            <div class="option" data-index="${optIndex}" onclick="selectOption(${index}, ${optIndex})">
+                                ${String.fromCharCode(65 + optIndex)}. ${option}
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+                
+                questionsContainer.appendChild(questionEl);
+            });
+            
+            // Show first question
+            showQuestion(0);
+        }
+        
+        // Show specific question
+        function showQuestion(index) {
+            // Hide all questions
+            document.querySelectorAll('.question-container').forEach(q => {
+                q.classList.remove('active');
+            });
+            
+            // Show current question
+            const questionEl = document.getElementById(`question-${index}`);
+            questionEl.classList.add('active');
+            
+            // Update progress
+            currentQuestionIndex = index;
+            currentQuestionEl.textContent = index + 1;
+            const progress = ((index + 1) / quizData.questions.length) * 100;
+            progressFillEl.style.width = `${progress}%`;
+            
+            // Update selected option if exists
+            const questionId = quizData.questions[index].id;
+            if (userAnswers[questionId] !== undefined) {
+                const options = questionEl.querySelectorAll('.option');
+                options.forEach(opt => {
+                    opt.classList.remove('selected');
+                    if (parseInt(opt.dataset.index) === userAnswers[questionId]) {
+                        opt.classList.add('selected');
+                    }
+                });
             }
             
-            // Disable button and show loading
-            submitBtn.disabled = true;
-            submitBtn.textContent = "Sending...";
-            statusDiv.className = "status";
+            // Update navigation buttons
+            prevBtn.disabled = index === 0;
+            nextBtn.textContent = index === quizData.questions.length - 1 ? 'Finish' : 'Next';
             
-            // Prepare payload
+            // Hide/show results
+            resultsContainer.classList.remove('active');
+        }
+        
+        // Select an option
+        function selectOption(questionIndex, optionIndex) {
+            const questionId = quizData.questions[questionIndex].id;
+            userAnswers[questionId] = optionIndex;
+            
+            // Update UI
+            const options = document.querySelectorAll(`#question-${questionIndex} .option`);
+            options.forEach(opt => {
+                opt.classList.remove('selected');
+                if (parseInt(opt.dataset.index) === optionIndex) {
+                    opt.classList.add('selected');
+                }
+            });
+            
+            // Auto-advance to next question after 500ms
+            if (questionIndex < quizData.questions.length - 1) {
+                setTimeout(() => {
+                    showQuestion(questionIndex + 1);
+                }, 500);
+            }
+        }
+        
+        // Previous question
+        function prevQuestion() {
+            if (currentQuestionIndex > 0) {
+                showQuestion(currentQuestionIndex - 1);
+            }
+        }
+        
+        // Next question
+        function nextQuestion() {
+            if (currentQuestionIndex < quizData.questions.length - 1) {
+                showQuestion(currentQuestionIndex + 1);
+            } else {
+                showResults();
+            }
+        }
+        
+        // Calculate and show results
+        function showResults() {
+            // Hide questions
+            document.querySelectorAll('.question-container').forEach(q => {
+                q.classList.remove('active');
+            });
+            
+            // Calculate score
+            let score = 0;
+            const results = [];
+            
+            quizData.questions.forEach((question, index) => {
+                const questionId = question.id;
+                const userAnswer = userAnswers[questionId];
+                const isCorrect = userAnswer === question.correct;
+                
+                if (isCorrect) {
+                    score++;
+                }
+                
+                results.push({
+                    question: question.question,
+                    userAnswer: userAnswer !== undefined ? question.options[userAnswer] : 'Not answered',
+                    correctAnswer: question.options[question.correct],
+                    isCorrect: isCorrect
+                });
+            });
+            
+            const percentage = (score / quizData.questions.length) * 100;
+            
+            // Update results UI
+            document.getElementById('score-percentage').textContent = `${percentage.toFixed(0)}%`;
+            document.getElementById('score-text').textContent = `${score}/${quizData.questions.length}`;
+            
+            // Set result message
+            let message = '';
+            if (percentage >= 80) {
+                message = '🎉 Excellent! You\'re a quiz master!';
+            } else if (percentage >= 60) {
+                message = '👍 Good job! You know your stuff!';
+            } else if (percentage >= 40) {
+                message = '😊 Not bad! Keep learning!';
+            } else {
+                message = '📚 Keep studying! You\'ll do better next time!';
+            }
+            document.getElementById('result-message').textContent = message;
+            
+            // Show detailed results
+            const detailsEl = document.getElementById('result-details');
+            detailsEl.innerHTML = '<h3>Detailed Results:</h3>' + 
+                results.map((result, idx) => `
+                    <div class="result-item">
+                        <strong>Q${idx + 1}:</strong> ${result.question}<br>
+                        <span>Your answer: ${result.userAnswer}</span><br>
+                        <span>Correct answer: ${result.correctAnswer}</span><br>
+                        <span>${result.isCorrect ? '✅ Correct' : '❌ Incorrect'}</span>
+                    </div>
+                `).join('');
+            
+            // Show results container
+            resultsContainer.classList.add('active');
+            quizResults = { score, total: quizData.questions.length, results };
+        }
+        
+        // Submit quiz to bot
+        function submitQuiz() {
+            const submitBtn = document.getElementById('submit-btn');
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Submitting...';
+            
             const payload = {
-                name: name,
-                score: score
+                type: "quiz_submission",
+                quiz_title: quizData.title,
+                answers: userAnswers,
+                score: quizResults.score,
+                total: quizResults.total,
+                timestamp: new Date().toISOString()
             };
             
-            // Send data to bot
             try {
                 tg.sendData(JSON.stringify(payload));
                 
-                // Show success message
-                statusDiv.textContent = "✅ Data sent successfully! Closing in 2 seconds...";
-                statusDiv.className = "status success";
+                statusEl.textContent = "✅ Quiz submitted successfully! Closing in 3 seconds...";
+                statusEl.className = "status success";
                 
-                // Close WebApp after delay
                 setTimeout(() => {
                     tg.close();
-                }, 2000);
+                }, 3000);
                 
             } catch (error) {
-                // Show error message
-                statusDiv.textContent = "❌ Error sending data. Please try again.";
-                statusDiv.className = "status error";
+                statusEl.textContent = "❌ Error submitting quiz. Please try again.";
+                statusEl.className = "status error";
                 
-                // Re-enable button
                 submitBtn.disabled = false;
-                submitBtn.textContent = "📤 Send to Bot";
+                submitBtn.textContent = '📤 Submit Quiz';
             }
-        });
+        }
         
-        // Set main button color to match theme
-        tg.MainButton.setParams({
-            color: '#667eea'
-        });
-    </script>
-</body>
-</html>
+        // Request quiz data from bot
+        function requestQuizData() {
+            const payload = {
+                type: "quiz_request",
+                user_id: tg.initDataUnsafe.user?.id,
+                timestamp: new Date().toISOString()
+            };
+            
+            tg.sendData(JSON.stringify(payload));
+            
+            // Start quiz with sample data (in production, wait for bot response)
+            setTimeout(initQuiz, 100);
+        }
+        
+        // Initialize on load
+        document.addEventListener('DOMContentLoaded', () => {
+            // Check if we have initData (meaning we're in Telegram)
+            if (tg.initDataUnsafe.user) {
+                requestQuizData();
+            } else {
+                // Not in Telegram, show error
+                loadingEl.innerHTML = `
+                    <div style="color: #f44336; text-align: center;">
+                        <h3>❌ Error</h3>
+                        <p>This quiz must be opened from Telegram.</p>
+                        <p>Please open this link from the Quiz
