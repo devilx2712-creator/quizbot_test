@@ -1,78 +1,228 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-<meta charset="UTF-8">
-<title>Submit Result</title>
-
-<script src="https://telegram.org/js/telegram-web-app.js"></script>
-
-<style>
-body {
-  font-family: Arial, sans-serif;
-  background: #f4f6f8;
-  margin: 0;
-  padding: 20px;
-}
-.card {
-  background: #fff;
-  padding: 20px;
-  border-radius: 10px;
-  max-width: 400px;
-  margin: auto;
-}
-input, button {
-  width: 100%;
-  padding: 12px;
-  margin-top: 10px;
-  font-size: 16px;
-}
-button {
-  background: #2a9df4;
-  color: white;
-  border: none;
-  border-radius: 6px;
-}
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Telegram Web App</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            width: 100%;
+            max-width: 400px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+        
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 10px;
+            font-size: 24px;
+        }
+        
+        .subtitle {
+            color: #666;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #555;
+            font-weight: 500;
+        }
+        
+        input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+        
+        input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .score-slider {
+            width: 100%;
+            margin: 10px 0;
+        }
+        
+        .score-value {
+            text-align: center;
+            font-weight: bold;
+            color: #667eea;
+            font-size: 18px;
+            margin-top: 5px;
+        }
+        
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px;
+            width: 100%;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            margin-top: 10px;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.4);
+        }
+        
+        .btn:active {
+            transform: translateY(0);
+        }
+        
+        .status {
+            text-align: center;
+            margin-top: 20px;
+            padding: 10px;
+            border-radius: 8px;
+            font-size: 14px;
+            display: none;
+        }
+        
+        .success {
+            background: #d4edda;
+            color: #155724;
+            display: block;
+        }
+        
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            display: block;
+        }
+    </style>
 </head>
-
 <body>
-<div class="card">
-  <h3>📝 Submit Result</h3>
+    <div class="container">
+        <h1>📊 Web App Demo</h1>
+        <p class="subtitle">Submit your data to the Telegram Bot</p>
+        
+        <form id="webapp-form">
+            <div class="form-group">
+                <label for="name">Your Name:</label>
+                <input type="text" id="name" placeholder="Enter your name" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="score">Your Score:</label>
+                <input type="range" id="score" class="score-slider" min="0" max="100" value="50">
+                <div class="score-value" id="score-value">50</div>
+            </div>
+            
+            <button type="submit" class="btn" id="submit-btn">
+                📤 Send to Bot
+            </button>
+        </form>
+        
+        <div id="status" class="status"></div>
+    </div>
 
-  <input id="name" placeholder="Enter Name">
-  <input id="score" type="number" placeholder="Enter Score">
-
-  <button onclick="sendData()">Send to Bot</button>
-</div>
-
-<script>
-  if (!window.Telegram || !Telegram.WebApp) {
-    alert("❌ Open this page from Telegram bot only");
-  }
-
-  const tg = Telegram.WebApp;
-  tg.expand();
-
-  function sendData() {
-    const name = document.getElementById("name").value.trim();
-    const score = document.getElementById("score").value.trim();
-
-    if (!name || !score) {
-      alert("Fill all fields");
-      return;
-    }
-
-    const payload = {
-      name: name,
-      score: score,
-      telegram_user_id: tg.initDataUnsafe?.user?.id || null
-    };
-
-    alert("✅ Sending data to bot...");
-
-    tg.sendData(JSON.stringify(payload));
-    tg.close();
-  }
-</script>
+    <script>
+        // Initialize Telegram Web App
+        const tg = window.Telegram.WebApp;
+        tg.expand();
+        tg.ready();
+        
+        // Update score display
+        const scoreSlider = document.getElementById('score');
+        const scoreValue = document.getElementById('score-value');
+        
+        scoreSlider.addEventListener('input', function() {
+            scoreValue.textContent = this.value;
+        });
+        
+        // Handle form submission
+        document.getElementById('webapp-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const submitBtn = document.getElementById('submit-btn');
+            const statusDiv = document.getElementById('status');
+            
+            // Get form data
+            const name = document.getElementById('name').value.trim();
+            const score = document.getElementById('score').value;
+            
+            if (!name) {
+                statusDiv.textContent = "Please enter your name";
+                statusDiv.className = "status error";
+                return;
+            }
+            
+            // Disable button and show loading
+            submitBtn.disabled = true;
+            submitBtn.textContent = "Sending...";
+            statusDiv.className = "status";
+            
+            // Prepare payload
+            const payload = {
+                name: name,
+                score: score
+            };
+            
+            // Send data to bot
+            try {
+                tg.sendData(JSON.stringify(payload));
+                
+                // Show success message
+                statusDiv.textContent = "✅ Data sent successfully! Closing in 2 seconds...";
+                statusDiv.className = "status success";
+                
+                // Close WebApp after delay
+                setTimeout(() => {
+                    tg.close();
+                }, 2000);
+                
+            } catch (error) {
+                // Show error message
+                statusDiv.textContent = "❌ Error sending data. Please try again.";
+                statusDiv.className = "status error";
+                
+                // Re-enable button
+                submitBtn.disabled = false;
+                submitBtn.textContent = "📤 Send to Bot";
+            }
+        });
+        
+        // Set main button color to match theme
+        tg.MainButton.setParams({
+            color: '#667eea'
+        });
+    </script>
 </body>
 </html>
