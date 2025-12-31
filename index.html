@@ -1,32 +1,109 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Send Data to Bot</title>
+  <title>Submit Result</title>
+
+  <!-- Telegram WebApp SDK -->
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f6f8;
+      margin: 0;
+      padding: 20px;
+    }
+
+    .card {
+      background: #ffffff;
+      padding: 20px;
+      border-radius: 10px;
+      max-width: 400px;
+      margin: auto;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    }
+
+    h2 {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    input {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 15px;
+      font-size: 16px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+    }
+
+    button {
+      width: 100%;
+      padding: 12px;
+      font-size: 16px;
+      border: none;
+      border-radius: 6px;
+      background: #2a9df4;
+      color: white;
+      cursor: pointer;
+    }
+
+    button:active {
+      background: #1c7fd6;
+    }
+
+    .note {
+      font-size: 12px;
+      color: #666;
+      text-align: center;
+      margin-top: 10px;
+    }
+  </style>
 </head>
 <body>
 
-<h3>📝 Enter Result</h3>
+  <div class="card">
+    <h2>📝 Submit Result</h2>
 
-<input id="name" placeholder="Name"><br><br>
-<input id="score" placeholder="Score"><br><br>
+    <input id="name" type="text" placeholder="Enter Name">
+    <input id="score" type="number" placeholder="Enter Score">
 
-<button onclick="send()">Send to Bot</button>
+    <button onclick="sendData()">Send to Bot</button>
 
-<script>
-  const tg = Telegram.WebApp;
-  tg.expand(); // full height
+    <div class="note">
+      Data will be sent securely to the bot
+    </div>
+  </div>
 
-  function send() {
-    const data = {
-      name: document.getElementById("name").value,
-      score: document.getElementById("score").value
-    };
+  <script>
+    const tg = Telegram.WebApp;
 
-    tg.sendData(JSON.stringify(data)); // 🔥 MAGIC LINE
-  }
-</script>
+    // Optional: expand WebApp height
+    tg.expand();
+
+    function sendData() {
+      const name = document.getElementById("name").value.trim();
+      const score = document.getElementById("score").value.trim();
+
+      if (!name || !score) {
+        alert("Please fill all fields");
+        return;
+      }
+
+      const payload = {
+        name: name,
+        score: score,
+        telegram_user_id: tg.initDataUnsafe?.user?.id || null
+      };
+
+      // 🔥 Send data to bot
+      tg.sendData(JSON.stringify(payload));
+
+      // Optional UX
+      tg.close();
+    }
+  </script>
 
 </body>
 </html>
