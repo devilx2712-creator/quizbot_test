@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Quiz Bot</title>
+    <title>Quiz Creator - Telegram Web App</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         * {
@@ -11,17 +11,17 @@
             padding: 0;
             box-sizing: border-box;
         }
-        
+
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
             padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
         }
-        
+
         .container {
             background: white;
             border-radius: 20px;
@@ -29,291 +29,291 @@
             width: 100%;
             max-width: 500px;
             box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-        }
-        
-        .header {
-            text-align: center;
-            margin-bottom: 30px;
-        }
-        
-        .header h1 {
-            color: #333;
-            font-size: 28px;
-            margin-bottom: 10px;
-        }
-        
-        .header p {
-            color: #666;
-            font-size: 16px;
-        }
-        
-        .quiz-progress {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
             margin-bottom: 20px;
-            padding: 10px 0;
-            border-bottom: 2px solid #f0f0f0;
         }
-        
-        .progress-bar {
-            flex-grow: 1;
-            height: 6px;
-            background: #e0e0e0;
-            border-radius: 3px;
-            margin: 0 15px;
-            overflow: hidden;
-        }
-        
-        .progress-fill {
-            height: 100%;
-            background: #667eea;
-            width: 0%;
-            transition: width 0.3s;
-        }
-        
-        .question-container {
-            display: none;
-        }
-        
-        .question-container.active {
-            display: block;
-            animation: fadeIn 0.5s;
-        }
-        
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        
-        .question-text {
-            font-size: 20px;
+
+        h1 {
             color: #333;
-            margin-bottom: 25px;
-            line-height: 1.4;
-        }
-        
-        .options-container {
-            display: grid;
-            gap: 12px;
-            margin-bottom: 30px;
-        }
-        
-        .option {
-            padding: 15px 20px;
-            border: 2px solid #e0e0e0;
-            border-radius: 12px;
-            cursor: pointer;
-            transition: all 0.2s;
-            font-size: 16px;
-            color: #333;
-        }
-        
-        .option:hover {
-            border-color: #667eea;
-            background: #f8f9ff;
-        }
-        
-        .option.selected {
-            border-color: #667eea;
-            background: #667eea;
-            color: white;
-        }
-        
-        .option.correct {
-            border-color: #4CAF50;
-            background: #4CAF50;
-            color: white;
-        }
-        
-        .option.incorrect {
-            border-color: #f44336;
-            background: #f44336;
-            color: white;
-        }
-        
-        .navigation {
+            text-align: center;
+            margin-bottom: 10px;
+            font-size: 24px;
             display: flex;
-            justify-content: space-between;
-            gap: 15px;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
         }
-        
-        .btn {
+
+        h2 {
+            color: #666;
+            font-size: 18px;
+            margin: 20px 0 10px 0;
+            padding-bottom: 5px;
+            border-bottom: 2px solid #667eea;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #555;
+            font-weight: 500;
+        }
+
+        input, textarea {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+
+        textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        input:focus, textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .option-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+            align-items: center;
+        }
+
+        .option-input {
             flex: 1;
-            padding: 15px;
+        }
+
+        .option-radio {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
             border: none;
-            border-radius: 12px;
+            padding: 15px;
+            width: 100%;
+            border-radius: 10px;
             font-size: 16px;
             font-weight: 600;
             cursor: pointer;
-            transition: all 0.2s;
+            transition: transform 0.2s, box-shadow 0.2s;
+            margin-top: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
         }
-        
-        .btn-primary {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-        }
-        
+
         .btn-secondary {
-            background: #f0f0f0;
-            color: #333;
+            background: linear-gradient(135deg, #6c757d 0%, #495057 100%);
+            margin-top: 5px;
         }
-        
+
         .btn:hover {
             transform: translateY(-2px);
-            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.4);
         }
-        
+
         .btn:active {
             transform: translateY(0);
         }
-        
+
         .btn:disabled {
-            opacity: 0.5;
+            opacity: 0.6;
             cursor: not-allowed;
             transform: none;
-            box-shadow: none;
         }
-        
-        .results-container {
-            display: none;
-            text-align: center;
-            padding: 20px 0;
-        }
-        
-        .results-container.active {
-            display: block;
-            animation: fadeIn 0.5s;
-        }
-        
-        .score-circle {
-            width: 150px;
-            height: 150px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
+
+        .checkbox-group {
             display: flex;
-            flex-direction: column;
-            justify-content: center;
             align-items: center;
-            margin: 0 auto 30px;
-            font-size: 24px;
-            font-weight: bold;
+            gap: 10px;
+            margin: 15px 0;
         }
-        
-        .score-percentage {
-            font-size: 36px;
-            margin-bottom: 5px;
+
+        .checkbox-group input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
         }
-        
-        .result-text {
-            font-size: 20px;
-            color: #333;
-            margin-bottom: 20px;
-        }
-        
-        .result-details {
-            text-align: left;
-            margin-top: 30px;
-            padding: 20px;
-            background: #f8f9ff;
-            border-radius: 12px;
-        }
-        
-        .result-item {
-            margin-bottom: 15px;
-            padding-bottom: 15px;
-            border-bottom: 1px solid #e0e0e0;
-        }
-        
-        .result-item:last-child {
-            border-bottom: none;
-        }
-        
+
         .status {
+            text-align: center;
+            margin-top: 20px;
             padding: 10px;
             border-radius: 8px;
-            margin: 10px 0;
-            text-align: center;
             font-size: 14px;
             display: none;
         }
-        
-        .status.success {
+
+        .success {
             background: #d4edda;
             color: #155724;
             display: block;
         }
-        
-        .status.error {
+
+        .error {
             background: #f8d7da;
             color: #721c24;
             display: block;
         }
-        
-        .loading {
-            text-align: center;
-            padding: 40px;
+
+        .counter {
+            text-align: right;
+            font-size: 12px;
             color: #666;
+            margin-top: 5px;
         }
-        
-        .spinner {
-            border: 4px solid #f3f3f3;
-            border-top: 4px solid #667eea;
+
+        .option-label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: normal;
+            margin-bottom: 0;
+        }
+
+        .correct-badge {
+            background: #28a745;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .remove-btn {
+            background: #dc3545;
+            color: white;
+            border: none;
+            width: 30px;
+            height: 30px;
             border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            animation: spin 1s linear infinite;
-            margin: 0 auto 20px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
         }
-        
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+
+        .preview-section {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 15px;
+            margin: 20px 0;
+            border-left: 4px solid #667eea;
+        }
+
+        .preview-question {
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #333;
+        }
+
+        .preview-option {
+            padding: 8px;
+            margin: 5px 0;
+            background: white;
+            border-radius: 5px;
+            border: 1px solid #dee2e6;
+        }
+
+        .preview-correct {
+            background: #d4edda;
+            border-color: #c3e6cb;
+        }
+
+        .instructions {
+            background: #e7f3ff;
+            border-radius: 10px;
+            padding: 15px;
+            margin: 20px 0;
+            font-size: 14px;
+            color: #0066cc;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <div class="header">
-            <h1>📚 Quiz Time</h1>
-            <p>Test your knowledge with this quiz</p>
+        <h1>📝 Quiz Creator</h1>
+        <p style="text-align: center; color: #666; margin-bottom: 20px;">Create interactive quiz polls for Telegram</p>
+
+        <div class="instructions">
+            💡 <strong>How it works:</strong> Create your quiz here, then send it as a Telegram poll. Users can vote and see results instantly.
         </div>
-        
-        <div id="loading" class="loading">
-            <div class="spinner"></div>
-            <p>Loading quiz...</p>
-        </div>
-        
-        <div id="quiz-content" style="display: none;">
-            <div class="quiz-progress">
-                <span id="current-question">1</span>
-                <div class="progress-bar">
-                    <div class="progress-fill" id="progress-fill"></div>
+
+        <form id="quiz-form">
+            <h2>📋 Poll Question</h2>
+            <div class="form-group">
+                <label for="question">Ask a question:</label>
+                <textarea 
+                    id="question" 
+                    placeholder="Enter your quiz question here..." 
+                    required
+                    maxlength="300"
+                ></textarea>
+                <div class="counter" id="question-counter">0/300</div>
+            </div>
+
+            <h2>📝 Quiz Answers</h2>
+            <div id="options-container">
+                <!-- Options will be added here -->
+            </div>
+
+            <button type="button" class="btn btn-secondary" id="add-option">
+                ➕ Add Option
+            </button>
+            <div class="counter" id="options-counter">2 options added (max: 10)</div>
+
+            <h2>⚙️ Settings</h2>
+            
+            <div class="form-group">
+                <div class="checkbox-group">
+                    <input type="checkbox" id="anonymous" checked>
+                    <label for="anonymous" class="option-label">
+                        <strong>Anonymous Voting</strong><br>
+                        <span style="font-weight: normal; font-size: 14px; color: #666;">Voters will remain anonymous</span>
+                    </label>
                 </div>
-                <span id="total-questions">3</span>
             </div>
-            
-            <div id="questions-container"></div>
-            
-            <div class="navigation">
-                <button id="prev-btn" class="btn btn-secondary" onclick="prevQuestion()">Previous</button>
-                <button id="next-btn" class="btn btn-primary" onclick="nextQuestion()">Next</button>
+
+            <div class="form-group">
+                <label for="explanation">Add an explanation (optional):</label>
+                <textarea 
+                    id="explanation" 
+                    placeholder="Users will see this text after choosing the wrong answer, good for educational purposes."
+                    maxlength="200"
+                ></textarea>
+                <div class="counter" id="explanation-counter">0/200</div>
             </div>
-            
-            <div id="results-container" class="results-container">
-                <div class="score-circle">
-                    <div class="score-percentage" id="score-percentage">0%</div>
-                    <div id="score-text">0/0</div>
+
+            <div class="preview-section">
+                <div class="preview-question" id="preview-question">Question preview will appear here...</div>
+                <div id="preview-options">
+                    <!-- Options preview -->
                 </div>
-                <div class="result-text" id="result-message"></div>
-                <button id="submit-btn" class="btn btn-primary" onclick="submitQuiz()">
-                    📤 Submit Quiz
-                </button>
-                <div id="result-details" class="result-details"></div>
+                <div style="font-size: 12px; color: #666; margin-top: 10px;">
+                    📊 This quiz will be sent as an interactive Telegram poll
+                </div>
             </div>
-        </div>
-        
+
+            <button type="submit" class="btn" id="submit-btn">
+                🚀 Create Quiz Poll
+            </button>
+        </form>
+
         <div id="status" class="status"></div>
     </div>
 
@@ -323,282 +323,226 @@
         tg.expand();
         tg.ready();
         
-        // Quiz state
-        let quizData = null;
-        let currentQuestionIndex = 0;
-        let userAnswers = {};
-        let quizResults = null;
-        
-        // DOM elements
-        const loadingEl = document.getElementById('loading');
-        const quizContentEl = document.getElementById('quiz-content');
-        const questionsContainer = document.getElementById('questions-container');
-        const currentQuestionEl = document.getElementById('current-question');
-        const totalQuestionsEl = document.getElementById('total-questions');
-        const progressFillEl = document.getElementById('progress-fill');
-        const prevBtn = document.getElementById('prev-btn');
-        const nextBtn = document.getElementById('next-btn');
-        const resultsContainer = document.getElementById('results-container');
-        const statusEl = document.getElementById('status');
-        
-        // Sample quiz data (in production, this comes from the bot)
-        const SAMPLE_QUIZ = {
-            "title": "General Knowledge Quiz",
-            "questions": [
-                {
-                    "id": 1,
-                    "question": "What is the capital of France?",
-                    "options": ["London", "Berlin", "Paris", "Madrid"],
-                    "correct": 2
-                },
-                {
-                    "id": 2,
-                    "question": "Which planet is known as the Red Planet?",
-                    "options": ["Venus", "Mars", "Jupiter", "Saturn"],
-                    "correct": 1
-                },
-                {
-                    "id": 3,
-                    "question": "What is 2 + 2?",
-                    "options": ["3", "4", "5", "6"],
-                    "correct": 1
-                }
-            ]
+        // Quiz data structure
+        let quizData = {
+            question: '',
+            options: ['', ''],
+            correct_option: 0,
+            explanation: '',
+            anonymous: true
         };
         
-        // Initialize quiz
-        function initQuiz() {
-            // In production, get quiz data from bot via initData or URL parameters
-            // For now, use sample data
-            quizData = SAMPLE_QUIZ;
+        // Initialize with 2 options
+        let optionCount = 2;
+        
+        // DOM elements
+        const questionInput = document.getElementById('question');
+        const explanationInput = document.getElementById('explanation');
+        const optionsContainer = document.getElementById('options-container');
+        const previewQuestion = document.getElementById('preview-question');
+        const previewOptions = document.getElementById('preview-options');
+        const questionCounter = document.getElementById('question-counter');
+        const explanationCounter = document.getElementById('explanation-counter');
+        const optionsCounter = document.getElementById('options-counter');
+        
+        // Initialize options
+        function initOptions() {
+            optionsContainer.innerHTML = '';
+            previewOptions.innerHTML = '';
             
-            // Show quiz content
-            loadingEl.style.display = 'none';
-            quizContentEl.style.display = 'block';
-            
-            // Update UI
-            totalQuestionsEl.textContent = quizData.questions.length;
-            
-            // Create question elements
-            quizData.questions.forEach((question, index) => {
-                const questionEl = document.createElement('div');
-                questionEl.className = 'question-container';
-                questionEl.id = `question-${index}`;
-                
-                questionEl.innerHTML = `
-                    <div class="question-text">${index + 1}. ${question.question}</div>
-                    <div class="options-container" id="options-${index}">
-                        ${question.options.map((option, optIndex) => `
-                            <div class="option" data-index="${optIndex}" onclick="selectOption(${index}, ${optIndex})">
-                                ${String.fromCharCode(65 + optIndex)}. ${option}
-                            </div>
-                        `).join('')}
-                    </div>
-                `;
-                
-                questionsContainer.appendChild(questionEl);
-            });
-            
-            // Show first question
-            showQuestion(0);
+            for (let i = 0; i < optionCount; i++) {
+                createOptionElement(i);
+            }
+            updatePreview();
+            updateCounters();
         }
         
-        // Show specific question
-        function showQuestion(index) {
-            // Hide all questions
-            document.querySelectorAll('.question-container').forEach(q => {
-                q.classList.remove('active');
-            });
+        // Create option element
+        function createOptionElement(index) {
+            const optionDiv = document.createElement('div');
+            optionDiv.className = 'option-group';
             
-            // Show current question
-            const questionEl = document.getElementById(`question-${index}`);
-            questionEl.classList.add('active');
+            optionDiv.innerHTML = `
+                <input type="radio" 
+                       name="correct" 
+                       class="option-radio" 
+                       id="radio-${index}"
+                       ${index === 0 ? 'checked' : ''}
+                       onchange="setCorrectOption(${index})">
+                <input type="text" 
+                       class="option-input" 
+                       placeholder="Option ${index + 1}"
+                       data-index="${index}"
+                       oninput="updateOption(${index}, this.value)"
+                       maxlength="100">
+                ${index >= 2 ? `<button type="button" class="remove-btn" onclick="removeOption(${index})">×</button>` : ''}
+            `;
             
-            // Update progress
-            currentQuestionIndex = index;
-            currentQuestionEl.textContent = index + 1;
-            const progress = ((index + 1) / quizData.questions.length) * 100;
-            progressFillEl.style.width = `${progress}%`;
-            
-            // Update selected option if exists
-            const questionId = quizData.questions[index].id;
-            if (userAnswers[questionId] !== undefined) {
-                const options = questionEl.querySelectorAll('.option');
-                options.forEach(opt => {
-                    opt.classList.remove('selected');
-                    if (parseInt(opt.dataset.index) === userAnswers[questionId]) {
-                        opt.classList.add('selected');
-                    }
-                });
+            optionsContainer.appendChild(optionDiv);
+        }
+        
+        // Add new option
+        document.getElementById('add-option').addEventListener('click', function() {
+            if (optionCount >= 10) {
+                showStatus('Maximum 10 options allowed', 'error');
+                return;
             }
             
-            // Update navigation buttons
-            prevBtn.disabled = index === 0;
-            nextBtn.textContent = index === quizData.questions.length - 1 ? 'Finish' : 'Next';
+            quizData.options.push('');
+            createOptionElement(optionCount);
+            optionCount++;
+            updateCounters();
+            updatePreview();
+        });
+        
+        // Remove option
+        function removeOption(index) {
+            if (optionCount <= 2) {
+                showStatus('Minimum 2 options required', 'error');
+                return;
+            }
             
-            // Hide/show results
-            resultsContainer.classList.remove('active');
+            quizData.options.splice(index, 1);
+            optionCount--;
+            
+            // Adjust correct option if needed
+            if (quizData.correct_option >= index) {
+                quizData.correct_option = Math.max(0, quizData.correct_option - 1);
+            }
+            
+            initOptions(); // Reinitialize all options
         }
         
-        // Select an option
-        function selectOption(questionIndex, optionIndex) {
-            const questionId = quizData.questions[questionIndex].id;
-            userAnswers[questionId] = optionIndex;
+        // Update option value
+        function updateOption(index, value) {
+            quizData.options[index] = value.trim();
+            updatePreview();
+        }
+        
+        // Set correct option
+        function setCorrectOption(index) {
+            quizData.correct_option = index;
+            updatePreview();
+        }
+        
+        // Update preview
+        function updatePreview() {
+            previewQuestion.textContent = quizData.question || 'Question preview will appear here...';
             
-            // Update UI
-            const options = document.querySelectorAll(`#question-${questionIndex} .option`);
-            options.forEach(opt => {
-                opt.classList.remove('selected');
-                if (parseInt(opt.dataset.index) === optionIndex) {
-                    opt.classList.add('selected');
+            previewOptions.innerHTML = '';
+            quizData.options.forEach((option, index) => {
+                if (option.trim()) {
+                    const optionDiv = document.createElement('div');
+                    optionDiv.className = `preview-option ${index === quizData.correct_option ? 'preview-correct' : ''}`;
+                    optionDiv.innerHTML = `
+                        ${option}
+                        ${index === quizData.correct_option ? ' <span class="correct-badge">Correct</span>' : ''}
+                    `;
+                    previewOptions.appendChild(optionDiv);
                 }
             });
             
-            // Auto-advance to next question after 500ms
-            if (questionIndex < quizData.questions.length - 1) {
-                setTimeout(() => {
-                    showQuestion(questionIndex + 1);
-                }, 500);
+            if (previewOptions.children.length === 0) {
+                previewOptions.innerHTML = '<div style="color: #666; font-style: italic;">Options will appear here...</div>';
             }
         }
         
-        // Previous question
-        function prevQuestion() {
-            if (currentQuestionIndex > 0) {
-                showQuestion(currentQuestionIndex - 1);
-            }
+        // Update counters
+        function updateCounters() {
+            questionCounter.textContent = `${quizData.question.length}/300`;
+            explanationCounter.textContent = `${quizData.explanation.length}/200`;
+            optionsCounter.textContent = `${optionCount} options added (max: 10)`;
         }
         
-        // Next question
-        function nextQuestion() {
-            if (currentQuestionIndex < quizData.questions.length - 1) {
-                showQuestion(currentQuestionIndex + 1);
-            } else {
-                showResults();
-            }
+        // Show status message
+        function showStatus(message, type) {
+            const statusDiv = document.getElementById('status');
+            statusDiv.textContent = message;
+            statusDiv.className = `status ${type}`;
+            setTimeout(() => {
+                statusDiv.className = 'status';
+            }, 3000);
         }
         
-        // Calculate and show results
-        function showResults() {
-            // Hide questions
-            document.querySelectorAll('.question-container').forEach(q => {
-                q.classList.remove('active');
-            });
-            
-            // Calculate score
-            let score = 0;
-            const results = [];
-            
-            quizData.questions.forEach((question, index) => {
-                const questionId = question.id;
-                const userAnswer = userAnswers[questionId];
-                const isCorrect = userAnswer === question.correct;
-                
-                if (isCorrect) {
-                    score++;
-                }
-                
-                results.push({
-                    question: question.question,
-                    userAnswer: userAnswer !== undefined ? question.options[userAnswer] : 'Not answered',
-                    correctAnswer: question.options[question.correct],
-                    isCorrect: isCorrect
-                });
-            });
-            
-            const percentage = (score / quizData.questions.length) * 100;
-            
-            // Update results UI
-            document.getElementById('score-percentage').textContent = `${percentage.toFixed(0)}%`;
-            document.getElementById('score-text').textContent = `${score}/${quizData.questions.length}`;
-            
-            // Set result message
-            let message = '';
-            if (percentage >= 80) {
-                message = '🎉 Excellent! You\'re a quiz master!';
-            } else if (percentage >= 60) {
-                message = '👍 Good job! You know your stuff!';
-            } else if (percentage >= 40) {
-                message = '😊 Not bad! Keep learning!';
-            } else {
-                message = '📚 Keep studying! You\'ll do better next time!';
-            }
-            document.getElementById('result-message').textContent = message;
-            
-            // Show detailed results
-            const detailsEl = document.getElementById('result-details');
-            detailsEl.innerHTML = '<h3>Detailed Results:</h3>' + 
-                results.map((result, idx) => `
-                    <div class="result-item">
-                        <strong>Q${idx + 1}:</strong> ${result.question}<br>
-                        <span>Your answer: ${result.userAnswer}</span><br>
-                        <span>Correct answer: ${result.correctAnswer}</span><br>
-                        <span>${result.isCorrect ? '✅ Correct' : '❌ Incorrect'}</span>
-                    </div>
-                `).join('');
-            
-            // Show results container
-            resultsContainer.classList.add('active');
-            quizResults = { score, total: quizData.questions.length, results };
-        }
+        // Event listeners for inputs
+        questionInput.addEventListener('input', function() {
+            quizData.question = this.value;
+            updatePreview();
+            updateCounters();
+        });
         
-        // Submit quiz to bot
-        function submitQuiz() {
+        explanationInput.addEventListener('input', function() {
+            quizData.explanation = this.value;
+            updateCounters();
+        });
+        
+        document.getElementById('anonymous').addEventListener('change', function() {
+            quizData.anonymous = this.checked;
+        });
+        
+        // Form submission
+        document.getElementById('quiz-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
             const submitBtn = document.getElementById('submit-btn');
+            const statusDiv = document.getElementById('status');
+            
+            // Validate question
+            if (!quizData.question.trim()) {
+                showStatus('Please enter a question', 'error');
+                questionInput.focus();
+                return;
+            }
+            
+            // Validate options
+            const validOptions = quizData.options.filter(opt => opt.trim());
+            if (validOptions.length < 2) {
+                showStatus('Please enter at least 2 options', 'error');
+                return;
+            }
+            
+            // Filter out empty options
+            quizData.options = validOptions;
+            
+            // Disable button and show loading
             submitBtn.disabled = true;
-            submitBtn.textContent = 'Submitting...';
+            submitBtn.innerHTML = '⏳ Creating...';
+            statusDiv.className = 'status';
             
-            const payload = {
-                type: "quiz_submission",
-                quiz_title: quizData.title,
-                answers: userAnswers,
-                score: quizResults.score,
-                total: quizResults.total,
-                timestamp: new Date().toISOString()
-            };
-            
+            // Send data to bot
             try {
-                tg.sendData(JSON.stringify(payload));
+                tg.sendData(JSON.stringify(quizData));
                 
-                statusEl.textContent = "✅ Quiz submitted successfully! Closing in 3 seconds...";
-                statusEl.className = "status success";
+                // Show success message
+                statusDiv.textContent = '✅ Quiz created successfully! Closing in 3 seconds...';
+                statusDiv.className = 'status success';
                 
+                // Close WebApp after delay
                 setTimeout(() => {
                     tg.close();
                 }, 3000);
                 
             } catch (error) {
-                statusEl.textContent = "❌ Error submitting quiz. Please try again.";
-                statusEl.className = "status error";
+                // Show error message
+                showStatus('❌ Error creating quiz. Please try again.', 'error');
                 
+                // Re-enable button
                 submitBtn.disabled = false;
-                submitBtn.textContent = '📤 Submit Quiz';
+                submitBtn.innerHTML = '🚀 Create Quiz Poll';
             }
-        }
+        });
         
-        // Request quiz data from bot
-        function requestQuizData() {
-            const payload = {
-                type: "quiz_request",
-                user_id: tg.initDataUnsafe.user?.id,
-                timestamp: new Date().toISOString()
-            };
-            
-            tg.sendData(JSON.stringify(payload));
-            
-            // Start quiz with sample data (in production, wait for bot response)
-            setTimeout(initQuiz, 100);
-        }
+        // Initialize the form
+        initOptions();
         
-        // Initialize on load
-        document.addEventListener('DOMContentLoaded', () => {
-            // Check if we have initData (meaning we're in Telegram)
-            if (tg.initDataUnsafe.user) {
-                requestQuizData();
-            } else {
-                // Not in Telegram, show error
-                loadingEl.innerHTML = `
-                    <div style="color: #f44336; text-align: center;">
-                        <h3>❌ Error</h3>
-                        <p>This quiz must be opened from Telegram.</p>
-                        <p>Please open this link from the Quiz
+        // Set main button color to match theme
+        tg.MainButton.setParams({
+            color: '#667eea'
+        });
+        
+        // Set theme to match Telegram
+        tg.setHeaderColor('#667eea');
+        tg.setBackgroundColor('#f0f0f0');
+    </script>
+</body>
+    </html>
